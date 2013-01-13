@@ -5,11 +5,11 @@ from django.conf import settings
 from django.conf.urls.defaults import patterns, url, include
 from django.contrib.sites.models import get_current_site
 from django.core.urlresolvers import reverse
-from django.core.mail import send_mail
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
 
 from paypal.standard.forms import PayPalPaymentsForm
 from paypal.standard.ipn.signals import payment_was_successful as success_signal
@@ -120,13 +120,13 @@ class OffsitePaypalBackend(object):
         order.save()
 
         # Sending email to user
-        from_email = settings.DEFAULT_FROM_EMAIL
-
-        order = self.shop.get_order_for_id(order_id)
         ctx = {'order': order}
 
         subject = render_to_string('main/order_done_mail_subject.txt', ctx)
         subject = ''.join(subject.splitlines())
         body = render_to_string('main/order_done_mail.txt', ctx)
+        body_html = render_to_string('main/order_done_mail.html', ctx)
 
-        send_mail(subject, body, from_email, [order.user.email])
+        msg = EmailMultiAlternatives(subject, body, settings.DEFAULT_FROM_EMAIL, [order.user.email])
+        msg.attach_alternative(body_html, "text/html")
+        msg.send()
