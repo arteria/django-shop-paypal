@@ -116,7 +116,7 @@ class OffsitePaypalBackend(object):
         self.shop.confirm_payment(self.shop.get_order_for_id(order_id), amount, transaction_id, self.backend_name)
 
         # Make sure order is marked as paid
-        order.status = order.CONFIRMED
+        order.status = order.COMPLETED
         order.save()
 
         # Sending email to user
