@@ -120,14 +120,16 @@ class OffsitePaypalBackend(object):
         order.status = order.COMPLETED
         order.save()
 
-        # Sending email to user
-        ctx = {'order': order}
 
-        subject = render_to_string('main/order_done_mail_subject.txt', ctx)
-        subject = ''.join(subject.splitlines())
-        body = render_to_string('main/order_done_mail.txt', ctx)
-        body_html = render_to_string('main/order_done_mail.html', ctx)
+        if getattr(settings, 'PAYPAL_SEND_EMAIL_TO_USER', False):
+            # Sending email to user
+            ctx = {'order': order}
 
-        msg = EmailMultiAlternatives(subject, body, settings.DEFAULT_FROM_EMAIL, [order.user.email])
-        msg.attach_alternative(body_html, "text/html")
-        msg.send()
+            subject = render_to_string('main/order_done_mail_subject.txt', ctx)
+            subject = ''.join(subject.splitlines())
+            body = render_to_string('main/order_done_mail.txt', ctx)
+            body_html = render_to_string('main/order_done_mail.html', ctx)
+
+            msg = EmailMultiAlternatives(subject, body, settings.DEFAULT_FROM_EMAIL, [order.user.email])
+            msg.attach_alternative(body_html, "text/html")
+            msg.send()
