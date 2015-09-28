@@ -10,6 +10,7 @@ from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
+from shop.util.decorators import on_method, order_required
 
 from paypal.standard.forms import PayPalPaymentsForm
 from paypal.standard.ipn.signals import payment_was_successful as success_signal
@@ -81,7 +82,8 @@ class OffsitePaypalBackend(object):
     #===========================================================================
     # Views
     #===========================================================================
-
+    
+    @on_method(order_required)
     def view_that_asks_for_money(self, request):
         '''
         We need this to be a method and not a function, since we need to have
